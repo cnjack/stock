@@ -1,0 +1,238 @@
+$--gain-more-color: #F94848; // 红色
+$--gain-less-color: #2CB532; // 绿色
+
+
+#box {
+    width: 100%;
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .3);
+
+    > .header {
+        display: flex;
+        justify-content: space-between;
+        background-color: #fff;
+        $--header-height: 35px;
+        padding-top: 3px;
+
+        > h1 {
+            padding: 0 12px;
+            font-size: 14px;
+            line-height: $--header-height;
+        }
+
+        > .action-buttons {
+            display: flex;
+            align-items: center;
+            padding-right: 5px;
+            -webkit-app-region: no-drag; // 按钮不可拖拽
+
+
+            > a {
+                display: block;
+                height: 14px;
+                line-height: 14px;
+                width: 30px;
+                text-align: center;
+                cursor: pointer;
+                color: #888;
+
+                > i {
+                    font-size: 14px;
+                }
+
+                &:hover {
+                    color: #000;
+                }
+
+                &.button-min {
+                    margin-left: 8px;
+                    padding-left: 8px;
+                    border-left: 1px solid #e0e0e0;
+                }
+
+                &.button-close {
+                    &:hover {
+                        color: #F84B4B;
+                    }
+                }
+            }
+        }
+    }
+
+    > .stock-index {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #eee;
+        background-color: #fff;
+        padding: 10px 10px 20px 10px;
+
+        > div {
+            width: 32%;
+            font-size: 13px;
+            box-sizing: border-box;
+            padding: 8px 5px;
+            background-color: #aaa;
+            border-radius: 2px;
+            transition: all .1s linear;
+
+            &.gain-more {
+                background-color: $--gain-more-color;
+
+                &:hover {
+                    background-color: darken($--gain-more-color, 5%);
+                }
+            }
+
+            &.gain-less {
+                background-color: $--gain-less-color;
+
+                &:hover {
+                    background-color: darken($--gain-less-color, 5%);
+                }
+            }
+
+
+            > .upper-info {
+                align-items: baseline;
+                font-weight: bold;
+                color: #fff;
+                text-align: center;
+
+                > h3 {
+                    font-size: 13px;
+                    font-style: normal;
+                }
+
+
+                > p {
+                    font-size: 16px;
+                }
+            }
+
+            > .index-gain {
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+                color: #fff;
+            }
+        }
+    }
+
+    .optional-stock-table {
+        overflow: hidden;
+
+        &:before {
+            display: none !important;
+        }
+
+        .caret-wrapper {
+            width: 18px !important;
+        }
+
+        .stock-info {
+            > div {
+                display: flex;
+                align-items: center;
+                padding-top: 4px;
+                margin-bottom: 5px;
+
+                > h3 {
+                    display: inline-block;
+                    font-size: 14px;
+                    line-height: 14px;
+                    color: #000;
+                    height: 14px;
+                    max-width: 70px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                > span {
+                    display: block;
+                    margin-left: 3px;
+                    padding: 0 2px;
+                    background-color: #aaa;
+                    border-radius: 2px;
+                    line-height: 14px;
+                    font-size: 11px;
+                    color: #fff;
+                }
+
+            }
+
+
+            > p {
+                font-size: 11px;
+                line-height: 11px;
+                color: #aaa;
+            }
+        }
+
+        .stock-price {
+            font-weight: bold;
+        }
+
+        .stock-volume {
+            font-weight: bold;
+        }
+
+        .gain-price {
+            color: #888;
+            font-weight: bold;
+
+            &.gain-more {
+                color: $--gain-more-color;
+            }
+
+            &.gain-less {
+                color: $--gain-less-color;
+            }
+        }
+
+        .gain-percent {
+            display: inline-block;
+            padding: 0 5px;
+            width: 65px;
+            color: #fff;
+            text-align: right;
+            font-weight: bold;
+            border-radius: 2px;
+            background-color: #ccc;
+
+            &.gain-more {
+                background-color: $--gain-more-color;
+            }
+
+            &.gain-less {
+                background-color: $--gain-less-color;
+            }
+        }
+    }
+}
+
+
+// element's dialog rewrite
+.el-dialog__wrapper {
+    top: 50px;
+    left: 10px;
+    bottom: 10px;
+    right: 10px;
+
+    > .el-dialog {
+        margin-top: 0 !important;
+        width: 400px !important;
+        border-radius: 0;
+        box-shadow: none !important;
+    }
+}
+
+.v-modal {
+    top: 50px;
+    left: 10px;
+    bottom: 10px;
+    right: 10px;
+    width: calc(100% - 20px);
+    height: calc(100% - 60px);
+}
