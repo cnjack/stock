@@ -86,15 +86,11 @@
       </el-form>
       <!--K线图/买卖/成交-->
       <div class="k-line">
-        <!--K线图-->
-        <div class="line-picture">
-          <img :src="kline" draggable="false" />
-        </div>
         <div class="order-list">
           <p class="inner-title">五档盘口</p>
           <!--卖手-->
           <ul class="sell-order">
-            <li v-for="(item, index) in reverseSell" v-bind:key="item">
+            <li v-for="(item, index) in reverseSell" v-bind:key="index">
               <span class="order-index"
                 >卖{{ reverseSell.length - index }}</span
               >
@@ -108,7 +104,7 @@
           </ul>
           <!--买手-->
           <ul class="buy-order">
-            <li v-for="(item, index) in stock.buy" v-bind:key="item">
+            <li v-for="(item, index) in stock.buy" v-bind:key="index">
               <span class="order-index">买{{ index + 1 }}</span>
               <span
                 class="order-price"
@@ -124,7 +120,7 @@
             class="deal-detail"
             v-if="this.stockIndex.indexOf(this.code) === -1"
           >
-            <li v-for="item in reverseDeal" v-bind:key="item">
+            <li v-for="(item, index) in reverseDeal" v-bind:key="index">
               <span class="deal-time">{{ item.time }}</span>
               <span
                 class="deal-price"
@@ -142,6 +138,10 @@
             </li>
           </ul>
         </div>
+        <!--K线图-->
+        <div class="line-picture">
+          <img :src="kline" draggable="false" />
+        </div>
       </div>
     </div>
   </div>
@@ -153,7 +153,30 @@ import { apiUrl, timeSpan, stockIndex } from "../libs/constant"; // api,请求�
 export default {
   data() {
     return {
-      stock: null, // 个股详情
+      stock: {
+        current: 0,
+        sell: [],
+        deal: [],
+        today: 0,
+        yesterday: 0,
+        highest: 0,
+        lowest: 0,
+        turnover: 0,
+        swing: 0,
+        gain: {
+          price: 0,
+          percent: 0,
+        },
+        limit: {
+          up: 0,
+          down: 0,
+        },
+        volume: {
+          total: 0, // 成交量
+          turn: 0, // 成交额
+        },
+        time: ""
+      }, // 个股详情
       kline: null, // k线图
       interval: null, // 轮询
       loading: null, // 弹窗
@@ -176,7 +199,10 @@ export default {
         params: { q: this.code },
       }).then((res) => {
         const item = res.data.split('"')[1].split("~");
-        const deal = item[29].split("|");
+        let deal = [];
+        if (item[29] != "") {
+          deal = item[29].split("|");
+        }
         this.stock = {
           name: item[1], // 名称
           code: item[2], // 代码
@@ -239,6 +265,7 @@ export default {
             },
           ], // 卖1-5
           deal: deal.map((detail) => {
+            console.log(detail);
             const per = detail.split("/");
             return {
               time: per[0].substring(0, 5),
@@ -299,16 +326,19 @@ export default {
     code() {
       return this.$route.params.code;
     },
-  },
-  watch: {
     // 倒序卖手
     reverseSell() {
-      return this.stock.sell.reverse();
+      const sell = this.stock.sell
+      return sell.reverse();
     },
     // 倒序实时成交
     reverseDeal() {
-      return this.stock.deal.reverse();
+      const deal = this.stock.deal
+      return deal.reverse();
     },
+  },
+  watch: {
+    
   },
 };
 </script>
