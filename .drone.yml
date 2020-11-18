@@ -18,7 +18,7 @@ steps:
   - name: deployment
     when:
       branch:
-        - release/*
+        - main 
     image: cnjackhack/drone-plugin-kube:0.0.2
     settings:
       template: .kubernetes/deployment.yaml
