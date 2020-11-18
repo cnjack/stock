@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stock_web
+  namespace: stock
+  labels:
+    app: stock_web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stock_web
+  template:
+    metadata:
+      labels:
+        app: stock_web
+    spec:
+      containers:
+      - name: stock_web
+        image: cnjackhack/stock_web:{{commit_branch}}_{{substr commit_sha 0 8}}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
