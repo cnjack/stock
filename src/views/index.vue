@@ -18,7 +18,7 @@
         v-for="(item, index) in indexs"
         :key="index"
         @contextmenu="showContext(item)"
-        :class="comparePrice(item.gain.percent, 0)"
+        :class="comparePrice(item.gains, 0)"
       >
         <div class="upper-info">
           <h3>{{ item.name }}</h3>
@@ -26,12 +26,12 @@
         </div>
         <p class="index-gain">
           <span
-            >{{ item.gain.price > 0 ? "+" : ""
-            }}{{ item.gain.price.toFixed(2) }}</span
+            >{{ item.price > 0 ? "+" : ""
+            }}{{ item.price.toFixed(2) }}</span
           >
           <span
-            >{{ item.gain.percent > 0 ? "+" : ""
-            }}{{ item.gain.percent.toFixed(2) }}%</span
+            >{{ item.gains > 0 ? "+" : ""
+            }}{{ item.gains.toFixed(2) }}%</span
           >
         </p>
       </div>
@@ -74,7 +74,7 @@
         <el-table-column label="成交量" align="right" width="90">
           <template slot-scope="props">
             <p class="stock-volume">
-              {{ transVolume(props.row.volume)
+              {{ transVolume(props.row.turnover_amount)
               }}{{ props.row.code.indexOf("hk") > -1 ? "股" : "手" }}
             </p>
           </template>
@@ -89,17 +89,17 @@
             <template v-if="!props.row.status">
               <span
                 class="gain-price"
-                :class="comparePrice(props.row.gain.percent, 0)"
+                :class="comparePrice(props.row.gains, 0)"
               >
-                {{ props.row.gain.price > 0 ? "+" : ""
-                }}{{ props.row.gain.price.toFixed(2) }}
+                {{ props.row.price > 0 ? "+" : ""
+                }}{{ props.row.price.toFixed(2) }}
               </span>
               <span
                 class="gain-percent"
-                :class="comparePrice(props.row.gain.percent, 0)"
+                :class="comparePrice(props.row.gains, 0)"
               >
-                {{ props.row.gain.percent > 0 ? "+" : ""
-                }}{{ props.row.gain.percent.toFixed(2) }}%
+                {{ props.row.gains > 0 ? "+" : ""
+                }}{{ props.row.gains.toFixed(2) }}%
               </span>
             </template>
             <template v-else>
@@ -116,10 +116,10 @@
 </template>
 
 <script>
-import { apiUrl, timeSpan, stockIndex } from "../libs/constant"; // api,请求间隔,三大指数
+import { timeSpan, stockIndex } from "../libs/constant"; // api,请求间隔,三大指数
 import Sortable from "sortablejs"; // 表格拖拽库
 import OptionalDialog from "../components/optional"; // 添加功能组件
-import Axios from "axios";
+import apis from "../libs/apis";
 export default {
   components: {
     OptionalDialog,
@@ -138,57 +138,42 @@ export default {
     this.rowDrop(); // 拖拽功能
   },
   methods: {
-    /**
-     * 通过腾讯接口获取指数&自选股的数据
-     */
     fetchData() {
-      const index = stockIndex.map((item) => "s_" + item); // 接口需要加前缀
       const storage = localStorage.getItem("optionals");
       let storageOptional = [];
       if (storage !== "" && storage !== null) {
         storageOptional = storage.split(",");
       }
-      const optionals = storageOptional.map(
-        (item) => "s_" + item.toLowerCase()
-      );
-      const all = index.concat(optionals);
-      const query = all.join(",");
-      Axios.get(apiUrl, { params: { q: query } }).then((res) => {
-        this.resolveData(res.data);
-      });
+
+      const stockIDs = stockIndex.concat(storageOptional)
+      apis.listStocks(stockIDs).then(this.resolveData.bind(this))
     },
     /**
      * 解析所有获取的股票数据
      * @param data {string} - 股票数据字符串
      */
     resolveData(data) {
-      this.indexs = [];
-      this.optionals = [];
-      data = data.replace(/[\r\n]/g, ""); // 去掉回车换行
-      data = data.substring(0, data.length - 1); // 删除最后一位字符
-      const splitData = data.split(";");
-      splitData.forEach((item, index) => {
-        const splitItem = item.split("="); // 按照等于号截取前后部分
-        const prefix = splitItem[0]; // 前缀部分 // 等号前
-        const suffix = splitItem[1].match(/"(.*?)"/)[1]; // 后缀内容，只取双引号内容
-        const content = suffix.substring(0, suffix.length - 1).split("~");
-        const stock = {
-          code: prefix.substring(4, 12),
-          name: content[1],
-          price: parseFloat(content[3]),
-          gain: {
-            price: parseFloat(content[4]),
-            percent: parseFloat(content[5]),
-          },
-          volume: content[6],
-          status: content[8] === "" ? null : content[8],
-        };
-        if (index < stockIndex.length) {
-          this.indexs.push(stock);
-        } else {
-          this.optionals.push(stock);
+      const indexs = [];
+      const optionals = [];
+      console.log(data.list);
+      data.list.forEach(stockItem => {
+        let isIndex = false
+        for (const item in stockIndex) {
+          if (stockIndex[item] == stockItem.internal_code) {
+            isIndex = true;
+            break;
+          }
         }
+        if (isIndex) {
+            indexs.push(stockItem);
+          } else {
+            optionals.push(stockItem);
+          }
       });
+      this.indexs = indexs;
+      this.optionals = optionals;
+      // this.$set(this, 'indexs', indexs);
+      // this.$set(this, 'optionals', optionals);
     },
 
     /**
